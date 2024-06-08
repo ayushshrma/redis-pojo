@@ -1,0 +1,98 @@
+apply plugin: 'jacoco'
+apply plugin: "org.sonarqube"
+apply plugin: "pmd"
+apply plugin: "com.github.spotbugs"
+
+jacoco {
+    toolVersion = "${jacoco_plugin_version}"
+}
+pmd {
+    toolVersion = "${pmd_plugin_version}"
+    consoleOutput = true
+    ruleSets = []
+    ruleSetFiles = files("build-config/pmd/pmd-ruleset.xml")
+    sourceSets = [sourceSets.main]
+}
+check.dependsOn pmdMain
+tasks.matching {task -> task.name.startsWith('spotbugs')}.forEach {
+    it.reports {
+        html.enabled = true
+        xml.enabled = true
+    }
+}
+spotbugsMain {
+    excludeFilter.set(
+            file("build-config/spotbugs/spotbugs-filter.xml")
+    )
+}
+check.dependsOn spotbugsMain
+def jacocoExcludes = [
+    '**/*Application.*',
+    '**/config/**',
+    '**/models/**',
+    '**/exceptions/**',
+    '**/dtos/**',
+    '**/*Constants*',
+]
+
+jacocoTestReport {
+    executionData tasks.withType(Test)
+    classDirectories.from = files(sourceSets.main.output.classesDirs)
+    sourceDirectories.from = files(sourceSets.main.java.srcDirs)
+
+    afterEvaluate {
+        getClassDirectories().setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExcludes)
+        }))
+    }
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn ":integrationTest"
+    executionData fileTree(project.buildDir.absolutePath).include("jacoco/*.exec")
+    afterEvaluate {
+        getClassDirectories().setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExcludes)
+        }))
+    }
+    violationRules {
+        rule {
+            element = 'BUNDLE'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = new BigDecimal("${jacoco_min_coverage_required}")
+            }
+            excludes = jacocoExcludes
+        }
+    }
+}
+
+check.dependsOn jacocoTestReport, jacocoTestCoverageVerification
+file("sonar-project.properties").withReader {
+    Properties sonarProperties = new Properties()
+    sonarProperties.load(it)
+
+    sonarProperties.each { key, value ->
+        sonarqube {
+            properties {
+                property key, value
+            }
+        }
+    }
+}
+spotless {
+    java {
+        targetExclude '**/test/**'
+        importOrder()
+        removeUnusedImports()
+        palantirJavaFormat("2.39.0")
+        formatAnnotations()
+    }
+}
+check.dependsOn spotlessCheck

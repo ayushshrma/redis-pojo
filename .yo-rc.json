@@ -1,0 +1,75 @@
+{
+  "generator-ez-gen": {
+    "appName": "redis-pojo",
+    "packageName": "com.demo",
+    "JavaVersion": "17",
+    "databaseType": "postgresql",
+    "buildTool": "gradle",
+    "features": [
+      "sonar",
+      "pmd",
+      "spotbugs",
+      "jacoco",
+      "spotless",
+      "jenkins",
+      "lombok",
+      "swagger",
+      "actuator",
+      "logback"
+    ],
+    "addEntity": "true",
+    "entity": [
+      {
+        "name": "Employee",
+        "fields": [
+          {
+            "name": "id",
+            "primary": "true"
+          },
+          {
+            "type": "String",
+            "name": "name"
+          },
+          {
+            "type": "String",
+            "name": "phone"
+          },
+          {
+            "type": "String",
+            "name": "Designation"
+          }
+        ]
+      }
+    ],
+    "JAVA_VERSION": "21",
+    "SPRING_BOOT_VERSION": "3.1.4",
+    "SPRING_DEP_MNGMNT_VERSION": "1.1.3",
+    "DEFAULT_APP_VERSION": "0.0.1-SNAPSHOT",
+    "SPRINGDOC_OPENAPI_VERSION": "2.2.0",
+    "COMMONS_IO_VERSION": "2.13.0",
+    "MAVEN_JUNIT5_VERSION": "5.3.2",
+    "JACOCO_MIN_COVERAGE_REQUIRED": "0.0",
+    "GRADLE_JACOCO_PLUGIN_VERSION": "0.8.10",
+    "GRADLE_SONAR_PLUGIN_VERSION": "4.3.0.3225",
+    "GRADLE_SPOTLESS_PLUGIN_VERSION": "6.21.0",
+    "MAVEN_DEPENDENCY_CHECK_PLUGIN_VERSION": "8.3.1",
+    "MAVEN_PROPERTIES_PLUGIN_VERSION": "1.2.0",
+    "MAVEN_SONAR_PLUGIN_VERSION": "3.9.1.2184",
+    "MAVEN_JACOCO_PLUGIN_VERSION": "0.8.10",
+    "MAVEN_SPOTLESS_PLUGIN_VERSION": "6.21.0",
+    "MAVEN_SPOTBUGS_PLUGIN_VERSION": "3.1.8",
+    "GRADLE_SPOTBUGS_PLUGIN_VERSION": "6.0.1",
+    "GRADLE_PMD_PLUGIN_VERSION": "6.37.0",
+    "MAVEN_PMD_PLUGIN_VERSION": "3.13.0",
+    "POSTGRESQL_IMAGE_VERSION": "16.3",
+    "POSTGRESQL_IMAGE": "postgres:16.3",
+    "MYSQL_IMAGE_VERSION": "8.4.0",
+    "MYSQL_IMAGE": "mysql:8.4.0",
+    "LIQUIBASE_VERSION": "4.18.0",
+    "JSON_WEB_TOKEN_API_VERSION": "0.11.5",
+    "JSON_WEB_TOKEN_IMPL_VERSION": "0.11.5",
+    "JSON_WEB_TOKEN_JACKSON_VERSION": "0.11.5",
+    "JAVAX_XML_BIND_VERSION": "2.3.0",
+    "packageFolder": "com/demo"
+  }
+}

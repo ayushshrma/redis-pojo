@@ -1,0 +1,125 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+plugins {
+    id "org.springframework.boot"
+    id "io.spring.dependency-management"
+    id "java-library"
+    id "com.diffplug.spotless"
+    id "org.sonarqube" apply false
+    id "com.github.spotbugs" apply false
+}
+
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ADOPTIUM
+        implementation = JvmImplementation.VENDOR_SPECIFIC
+    }
+}
+
+apply from: "gradle/code-quality.gradle"
+
+
+group = "com.demo"
+version = "0.0.1-SNAPSHOT"
+sourceCompatibility = 17
+targetCompatibility = 17
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    developmentOnly "org.springframework.boot:spring-boot-devtools"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation 'org.springframework.data:spring-data-jpa'
+    runtimeOnly "org.postgresql:postgresql"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdoc_openapi_version}"
+    implementation "org.apache.commons:commons-lang3"
+    implementation "commons-io:commons-io:${commons_io_version}"
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '3.3.0'
+    implementation group: 'io.lettuce', name: 'lettuce-core', version: '6.3.2.RELEASE'
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation('com.h2database:h2') //in-memory db for tests
+
+
+}
+
+defaultTasks "bootRun"
+
+springBoot {
+    buildInfo()
+}
+
+bootJar {
+    //launchScript()
+}
+
+bootBuildImage {
+    imageName = "DOCKER_USERNAME/redis-pojo"
+}
+
+compileJava.dependsOn processResources
+processResources.dependsOn bootBuildInfo
+
+if (project.hasProperty("local")) {
+    bootRun {
+        args = ["--spring.profiles.active=local"]
+    }
+}
+
+
+test {
+    useJUnitPlatform()
+    exclude "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
+    testLogging {
+        events = ["PASSED", "FAILED", "SKIPPED"]
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
+}
+
+task integrationTest(type: Test) {
+    useJUnitPlatform()
+
+    include "**/*IT*", "**/*IntegrationTest*", "**/*IntTest*"
+    shouldRunAfter test
+
+    testLogging {
+        events = ["PASSED", "FAILED", "SKIPPED"]
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
+}
+
+check.dependsOn integrationTest
+
+tasks.register('testReport', TestReport) {
+    destinationDirectory = file("$buildDir/reports/tests")
+    testResults.from(test)
+}
+
+tasks.register('integrationTestReport', TestReport) {
+    destinationDirectory = file("$buildDir/reports/tests")
+    testResults.from(integrationTest)
+}
+
